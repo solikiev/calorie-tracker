@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CalTrack" />
+  <meta name="description" content="Track daily calories and carbs with per-day custom targets" />
+  <title>CalTrack</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<!-- ── Header ───────────────────────────────────────────── -->
+<header class="app-header">
+  <h1>Cal<span>Track</span></h1>
+  <span style="font-size:1.5rem">🥗</span>
+</header>
+
+<!-- ── Tab Bar ──────────────────────────────────────────── -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="today">📋 Log</button>
+  <button class="tab-btn" data-tab="calendar">📅 Calendar</button>
+  <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  VIEW: TODAY / HISTORY                                -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="main" id="view-today">
+
+  <!-- Date picker -->
+  <div class="date-picker-row">
+    <label for="date-picker" style="margin:0;flex-shrink:0;color:var(--muted);font-size:.8125rem">📆 Viewing:</label>
+    <input type="date" id="date-picker" />
+  </div>
+
+  <p id="selected-date-lbl" style="font-weight:700;font-size:1.0625rem;margin-bottom:1rem"></p>
+
+  <!-- Summary -->
+  <div class="summary-grid" style="margin-bottom:1rem">
+    <div class="meter-card" id="cal-summary"></div>
+    <div class="meter-card" id="carb-summary"></div>
+  </div>
+
+  <!-- Per-day target -->
+  <div class="card">
+    <div class="card-title">🎯 Target for This Day</div>
+    <div class="section-label">Calories (kcal)</div>
+    <div class="range-row" style="margin-bottom:.875rem">
+      <div><label>Min</label><input type="number" id="day-cal-min" placeholder="e.g. 1800" min="0" /></div>
+      <div><label>Max</label><input type="number" id="day-cal-max" placeholder="e.g. 2200" min="0" /></div>
+    </div>
+    <div class="section-label">Carbohydrates (g)</div>
+    <div class="range-row">
+      <div><label>Min</label><input type="number" id="day-carb-min" placeholder="e.g. 180" min="0" /></div>
+      <div><label>Max</label><input type="number" id="day-carb-max" placeholder="e.g. 270" min="0" /></div>
+    </div>
+    <button class="btn btn-save-target" id="save-day-target">💾 Save Target for This Day</button>
+  </div>
+
+  <!-- Food log -->
+  <div class="card">
+    <div class="card-title">🍽️ Food Log</div>
+    <div id="food-list"></div>
+    <button class="btn btn-primary" id="add-food-btn" style="margin-top:.875rem">+ Add Food</button>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  VIEW: CALENDAR                                        -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="main" id="view-calendar" style="display:none">
+  <div class="card">
+    <div class="cal-header">
+      <button class="cal-nav" id="cal-prev">‹</button>
+      <span class="cal-month" id="cal-month"></span>
+      <button class="cal-nav" id="cal-next">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <hr class="divider" />
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.78rem;color:var(--muted)">
+      <span>🟢 On target</span>
+      <span>🟡 Under target</span>
+      <span>🔴 Over target</span>
+      <span style="margin-left:auto;font-style:italic">Tap a day to edit</span>
+    </div>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  VIEW: SETTINGS                                        -->
+<!-- ══════════════════════════════════════════════════════ -->
+<main class="main" id="view-settings" style="display:none">
+  <div class="card">
+    <div class="card-title">⚙️ Default Targets</div>
+    <p style="font-size:.875rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.6">
+      These are used as the <strong>fallback target</strong> for any day that doesn't have its own target saved. 
+      You can override on a per-day basis in the Log tab.
+    </p>
+    <div class="section-label">Calories (kcal)</div>
+    <div class="range-row" style="margin-bottom:.875rem">
+      <div><label>Min</label><input type="number" id="def-cal-min" placeholder="1800" min="0" /></div>
+      <div><label>Max</label><input type="number" id="def-cal-max" placeholder="2200" min="0" /></div>
+    </div>
+    <div class="section-label">Carbohydrates (g)</div>
+    <div class="range-row">
+      <div><label>Min</label><input type="number" id="def-carb-min" placeholder="180" min="0" /></div>
+      <div><label>Max</label><input type="number" id="def-carb-max" placeholder="270" min="0" /></div>
+    </div>
+    <button class="btn btn-primary" id="save-default" style="margin-top:.875rem">💾 Save Default Targets</button>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="card-title">📱 Install App</div>
+    <p style="font-size:.875rem;color:var(--muted);line-height:1.6">
+      On <strong>iOS Safari</strong>: tap the Share button → "Add to Home Screen".<br/><br/>
+      On <strong>Android Chrome</strong>: tap the 3-dot menu → "Add to Home Screen" or "Install App".
+    </p>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="card-title">🗂️ Data</div>
+    <p style="font-size:.875rem;color:var(--muted);margin-bottom:1rem;line-height:1.6">
+      All data is stored locally on this device in your browser's LocalStorage. Nothing is sent to any server.
+    </p>
+    <button class="btn btn-danger" id="clear-data" style="width:100%">🗑️ Clear All Data</button>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  MODAL: Add / Edit Entry                              -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div id="modal-backdrop" class="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">Add Food Entry</div>
+    <div style="display:flex;flex-direction:column;gap:.875rem">
+      <div><label for="entry-name">Food Name</label><input type="text" id="entry-name" placeholder="e.g. Chicken breast" autocomplete="off" /></div>
+      <div><label for="entry-cal">Calories (kcal)</label><input type="number" id="entry-cal" placeholder="e.g. 250" min="0" /></div>
+      <div><label for="entry-carb">Carbs (g)</label><input type="number" id="entry-carb" placeholder="e.g. 30" min="0" /></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save" style="margin-top:0">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────── -->
+<div id="toast" class="toast"></div>
+
+<script src="/js/app.js"></script>
+<script>
+  // Clear data button
+  document.getElementById('clear-data').addEventListener('click', () => {
+    if (confirm('Delete ALL logged data and targets? This cannot be undone.')) {
+      localStorage.clear();
+      location.reload();
+    }
+  });
+</script>
+</body>
+</html>
